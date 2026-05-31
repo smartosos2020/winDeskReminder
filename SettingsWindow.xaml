@@ -1,0 +1,148 @@
+<Window x:Class="WinDeskReminder.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="设置"
+        Width="560"
+        Height="600"
+        WindowStartupLocation="CenterOwner"
+        Background="#F8FAFC">
+    <DockPanel Margin="18">
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+            <TextBlock Text="WinDeskReminder"
+                       FontSize="22"
+                       FontWeight="SemiBold"
+                       Foreground="#0F172A" />
+            <TextBlock Text="桌面小挂件与提醒设置"
+                       Margin="0,4,0,0"
+                       Foreground="#64748B" />
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,16,0,0">
+            <Button Content="取消"
+                    Background="#E2E8F0"
+                    Foreground="#0F172A"
+                    Click="Cancel_Click" />
+            <Button Content="保存"
+                    Background="#2563EB"
+                    Foreground="#FFFFFF"
+                    Click="Save_Click" />
+        </StackPanel>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Border Background="#FFFFFF" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <CheckBox Content="启用屏幕边缘小挂件"
+                                  IsChecked="{Binding WidgetEnabled}"
+                                  FontSize="14"
+                                  Foreground="#0F172A" />
+                        <CheckBox Content="提醒时播放声音"
+                                  IsChecked="{Binding SoundEnabled}"
+                                  Margin="0,10,0,0"
+                                  FontSize="14"
+                                  Foreground="#0F172A" />
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="130" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="吸附边缘" VerticalAlignment="Center" Foreground="#334155" />
+                            <ComboBox x:Name="EdgeBox"
+                                      Grid.Row="0"
+                                      Grid.Column="1"
+                                      Height="30"
+                                      SelectedItem="{Binding DockEdge}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="显示器" Margin="0,12,0,0" VerticalAlignment="Center" Foreground="#334155" />
+                            <ComboBox x:Name="ScreenBox"
+                                      Grid.Row="1"
+                                      Grid.Column="1"
+                                      Height="30"
+                                      Margin="0,12,0,0"
+                                      DisplayMemberPath="Name"
+                                      SelectedValuePath="DeviceName"
+                                      SelectedValue="{Binding ScreenDeviceName}" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="背板透明度" Margin="0,12,0,0" VerticalAlignment="Center" Foreground="#334155" />
+                            <Slider Grid.Row="2"
+                                    Grid.Column="1"
+                                    Margin="0,12,0,0"
+                                    Minimum="0.25"
+                                    Maximum="1"
+                                    TickFrequency="0.05"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding BackdropOpacity}" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="无操作暂停" Margin="0,12,0,0" VerticalAlignment="Center" Foreground="#334155" />
+                            <DockPanel Grid.Row="3" Grid.Column="1" Margin="0,12,0,0">
+                                <TextBox Width="80"
+                                         HorizontalAlignment="Left"
+                                         Text="{Binding IdlePauseMinutes, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text=" 分钟"
+                                           Foreground="#334155"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0" />
+                            </DockPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="#FFFFFF" CornerRadius="8" Padding="16">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,10">
+                            <TextBlock Text="提醒项目"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="#0F172A" />
+                            <Button Content="新增"
+                                    DockPanel.Dock="Right"
+                                    Background="#E2E8F0"
+                                    Foreground="#0F172A"
+                                    Click="AddReminder_Click" />
+                            <Button Content="删除"
+                                    DockPanel.Dock="Right"
+                                    Background="#FEE2E2"
+                                    Foreground="#991B1B"
+                                    Click="DeleteReminder_Click" />
+                        </DockPanel>
+
+                        <DataGrid x:Name="ReminderGrid"
+                                  ItemsSource="{Binding Reminders}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="None"
+                                  RowHeaderWidth="0"
+                                  MinHeight="220">
+                            <DataGrid.Columns>
+                                <DataGridCheckBoxColumn Header="启用"
+                                                        Width="58"
+                                                        Binding="{Binding IsEnabled}" />
+                                <DataGridTextColumn Header="名称"
+                                                    Width="*"
+                                                    Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                                <DataGridTextColumn Header="间隔(分钟)"
+                                                    Width="95"
+                                                    Binding="{Binding WorkMinutes, UpdateSourceTrigger=PropertyChanged}" />
+                                <DataGridTextColumn Header="执行(分钟)"
+                                                    Width="95"
+                                                    Binding="{Binding ActionMinutes, UpdateSourceTrigger=PropertyChanged}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

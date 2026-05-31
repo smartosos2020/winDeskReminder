@@ -1,0 +1,155 @@
+<Application x:Class="WinDeskReminder.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <Color x:Key="PrimaryBlueColor">#2563EB</Color>
+        <Color x:Key="MintGreenColor">#22C55E</Color>
+        <Color x:Key="TealColor">#14B8A6</Color>
+        <Color x:Key="TextDarkColor">#0F172A</Color>
+        <Color x:Key="TextMediumColor">#64748B</Color>
+        <Color x:Key="BorderGrayColor">#E5E7EB</Color>
+        <Color x:Key="BgLightColor">#F8FAFC</Color>
+
+        <SolidColorBrush x:Key="PrimaryBlueBrush" Color="{StaticResource PrimaryBlueColor}" />
+        <SolidColorBrush x:Key="MintGreenBrush" Color="{StaticResource MintGreenColor}" />
+        <SolidColorBrush x:Key="TealBrush" Color="{StaticResource TealColor}" />
+        <SolidColorBrush x:Key="TextDarkBrush" Color="{StaticResource TextDarkColor}" />
+        <SolidColorBrush x:Key="TextMediumBrush" Color="{StaticResource TextMediumColor}" />
+        <SolidColorBrush x:Key="BorderGrayBrush" Color="{StaticResource BorderGrayColor}" />
+        <SolidColorBrush x:Key="BgLightBrush" Color="{StaticResource BgLightColor}" />
+        <SolidColorBrush x:Key="PanelTextBrush" Color="{StaticResource TextDarkColor}" />
+        <SolidColorBrush x:Key="MutedTextBrush" Color="{StaticResource TextMediumColor}" />
+
+        <Style TargetType="Button">
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="MinWidth" Value="28" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource TextMediumBrush}" />
+            <Setter Property="Background" Value="#FFFFFFFF" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonChrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{StaticResource BorderGrayBrush}"
+                                BorderThickness="1"
+                                CornerRadius="14">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="#EFF6FF" />
+                                <Setter Property="Foreground" Value="{StaticResource PrimaryBlueBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{StaticResource PrimaryBlueBrush}" />
+                                <Setter Property="Foreground" Value="#FFFFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="HeaderIconButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="MinWidth" Value="30" />
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="Normal" />
+        </Style>
+
+        <Style x:Key="CardIconButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="MinWidth" Value="28" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Normal" />
+        </Style>
+
+        <Style x:Key="SlimProgressBarStyle" TargetType="ProgressBar">
+            <Setter Property="Height" Value="4" />
+            <Setter Property="Background" Value="#E8EEF6" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid x:Name="TemplateRoot">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="2" />
+                            <Border x:Name="PART_Track" Background="Transparent" CornerRadius="2" />
+                            <Decorator x:Name="PART_Indicator"
+                                       HorizontalAlignment="Left">
+                                <Border Background="{TemplateBinding Foreground}" CornerRadius="2" />
+                            </Decorator>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Geometry x:Key="LogoHeartGeometry">M 24 6 C 19 0 8 1 5 10 C 1 22 15 31 24 40 C 33 31 47 22 43 10 C 40 1 29 0 24 6 Z M 8 21 L 15 21 L 18 13 L 24 31 L 29 18 L 32 24 L 40 24</Geometry>
+        <Geometry x:Key="StandIconGeometry">M 20 7 A 4 4 0 1 1 19.9 7 M 20 14 L 20 27 M 15 18 L 20 15 L 25 18 M 20 27 L 14 38 M 20 27 L 27 38 M 14 38 L 10 38 M 27 38 L 32 38</Geometry>
+        <Geometry x:Key="WaterIconGeometry">M 22 5 C 14 16 10 23 10 30 C 10 38 15 43 22 43 C 30 43 35 38 35 30 C 35 23 30 16 22 5 Z M 18 32 C 18 35 20 37 23 37</Geometry>
+        <Geometry x:Key="EyeIconGeometry">M 5 24 C 10 14 18 10 24 10 C 30 10 38 14 43 24 C 38 34 30 38 24 38 C 18 38 10 34 5 24 Z M 24 17 A 7 7 0 1 1 23.9 17 M 24 21 A 3 3 0 1 1 23.9 21</Geometry>
+
+        <DataTemplate x:Key="LogoIconTemplate">
+            <Viewbox Width="24" Height="24">
+                <Grid Width="48" Height="48">
+                    <Path Data="{StaticResource LogoHeartGeometry}"
+                          Fill="{StaticResource PrimaryBlueBrush}"
+                          Stroke="{StaticResource PrimaryBlueBrush}"
+                          StrokeThickness="2"
+                          StrokeStartLineCap="Round"
+                          StrokeEndLineCap="Round"
+                          StrokeLineJoin="Round" />
+                    <Path Data="M 8 21 L 15 21 L 18 13 L 24 31 L 29 18 L 32 24 L 40 24"
+                          Stroke="#FFFFFFFF"
+                          StrokeThickness="3.2"
+                          StrokeStartLineCap="Round"
+                          StrokeEndLineCap="Round"
+                          StrokeLineJoin="Round" />
+                </Grid>
+            </Viewbox>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StandIconTemplate">
+            <Viewbox Width="20" Height="20">
+                <Path Data="{StaticResource StandIconGeometry}"
+                      Stroke="{StaticResource MintGreenBrush}"
+                      StrokeThickness="4"
+                      StrokeStartLineCap="Round"
+                      StrokeEndLineCap="Round"
+                      StrokeLineJoin="Round" />
+            </Viewbox>
+        </DataTemplate>
+
+        <DataTemplate x:Key="WaterIconTemplate">
+            <Viewbox Width="20" Height="20">
+                <Path Data="{StaticResource WaterIconGeometry}"
+                      Fill="{StaticResource PrimaryBlueBrush}"
+                      Stroke="{StaticResource PrimaryBlueBrush}"
+                      StrokeThickness="2"
+                      StrokeStartLineCap="Round"
+                      StrokeEndLineCap="Round"
+                      StrokeLineJoin="Round" />
+            </Viewbox>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EyeIconTemplate">
+            <Viewbox Width="21" Height="21">
+                <Path Data="{StaticResource EyeIconGeometry}"
+                      Fill="Transparent"
+                      Stroke="{StaticResource TealBrush}"
+                      StrokeThickness="4"
+                      StrokeStartLineCap="Round"
+                      StrokeEndLineCap="Round"
+                      StrokeLineJoin="Round" />
+            </Viewbox>
+        </DataTemplate>
+    </Application.Resources>
+</Application>

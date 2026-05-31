@@ -1,0 +1,17 @@
+bin/
+obj/
+artifacts/
+.tools/
+
+*.user
+*.suo
+*.cache
+*.log
+*.pdb
+*.wixpdb
+
+.vs/
+.vscode/
+
+TestResults/
+packages/
