@@ -7,7 +7,9 @@ namespace WinDeskReminder;
 
 public partial class App : System.Windows.Application
 {
+    private AppActivationService? _activationService;
     private SettingsStore? _settingsStore;
+    private DailyStatsStore? _statsStore;
     private AppSettings? _settings;
     private ReminderController? _controller;
     private MainWindow? _widget;
@@ -19,15 +21,42 @@ public partial class App : System.Windows.Application
         DispatcherUnhandledException += OnDispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
+        _activationService = new AppActivationService();
+        if (!_activationService.IsPrimaryInstance)
+        {
+            AppActivationService.TrySendToPrimary(e.Args);
+            Shutdown();
+            return;
+        }
+
         base.OnStartup(e);
 
         _settingsStore = new SettingsStore();
+        _statsStore = new DailyStatsStore();
         _settings = _settingsStore.Load();
+        StartupService.Apply(_settings.StartWithWindows);
+
         _controller = new ReminderController(_settings);
         _widget = new MainWindow(_settings, _controller, _settingsStore, OpenSettings);
-        _tray = new TrayIconService(_settings, _settingsStore, _controller, _widget, OpenSettings, ExitApplication);
+        var toastNotifications = new ToastNotificationService();
+        _tray = new TrayIconService(
+            _settings,
+            _settingsStore,
+            _statsStore,
+            toastNotifications,
+            _controller,
+            _widget,
+            OpenSettings,
+            ExitApplication);
 
         _controller.NotificationRequested += item => _tray.ShowReminder(item);
+        _controller.ReminderCompleted += item =>
+        {
+            _statsStore.RecordCompletion(item);
+            _tray.RefreshMenu();
+        };
+        _activationService.CommandReceived += HandleActivationCommand;
+        _activationService.Start();
         _controller.Start();
 
         if (_settings.WidgetEnabled)
@@ -35,6 +64,8 @@ public partial class App : System.Windows.Application
             _widget.Show();
             _widget.RevealTemporarily(TimeSpan.FromSeconds(6));
         }
+
+        _activationService.Dispatch(e.Args);
     }
 
     private void OpenSettings()
@@ -70,6 +101,7 @@ public partial class App : System.Windows.Application
     {
         _tray?.Dispose();
         _controller?.Dispose();
+        _activationService?.Dispose();
         Shutdown();
     }
 
@@ -77,7 +109,59 @@ public partial class App : System.Windows.Application
     {
         _tray?.Dispose();
         _controller?.Dispose();
+        _activationService?.Dispose();
         base.OnExit(e);
+    }
+
+    private void HandleActivationCommand(string command)
+    {
+        if (_controller is null || _widget is null)
+        {
+            return;
+        }
+
+        if (!Uri.TryCreate(command.Trim('"'), UriKind.Absolute, out var uri)
+            || !string.Equals(uri.Scheme, "windeskreminder", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (uri.Host.Equals("show", StringComparison.OrdinalIgnoreCase))
+        {
+            _widget.Show();
+            _widget.RevealTemporarily(TimeSpan.FromSeconds(8));
+            return;
+        }
+
+        var parts = uri.AbsolutePath.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (!uri.Host.Equals("reminder", StringComparison.OrdinalIgnoreCase) || parts.Length != 2)
+        {
+            return;
+        }
+
+        var reminderId = Uri.UnescapeDataString(parts[0]);
+        var action = parts[1];
+        var item = _controller.Items.FirstOrDefault(entry => entry.Id == reminderId);
+        if (item is null)
+        {
+            return;
+        }
+
+        switch (action)
+        {
+            case "start":
+                _controller.PrimaryAction(item);
+                break;
+            case "snooze":
+                _controller.Snooze(item, TimeSpan.FromMinutes(5));
+                break;
+            case "skip":
+                _controller.Reset(item);
+                break;
+        }
+
+        _widget.Show();
+        _widget.RevealTemporarily(TimeSpan.FromSeconds(6));
     }
 
     private static void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

@@ -6,6 +6,7 @@ public sealed class AppSettings
 {
     public bool WidgetEnabled { get; set; } = true;
     public bool SoundEnabled { get; set; } = true;
+    public bool StartWithWindows { get; set; }
     public DockEdge DockEdge { get; set; } = DockEdge.Right;
     public string? ScreenDeviceName { get; set; }
     public bool IsDocked { get; set; } = true;
@@ -20,6 +21,7 @@ public sealed class AppSettings
         {
             WidgetEnabled = WidgetEnabled,
             SoundEnabled = SoundEnabled,
+            StartWithWindows = StartWithWindows,
             DockEdge = DockEdge,
             ScreenDeviceName = ScreenDeviceName,
             IsDocked = IsDocked,
@@ -34,6 +36,7 @@ public sealed class AppSettings
     {
         WidgetEnabled = source.WidgetEnabled;
         SoundEnabled = source.SoundEnabled;
+        StartWithWindows = source.StartWithWindows;
         DockEdge = source.DockEdge;
         ScreenDeviceName = source.ScreenDeviceName;
         IsDocked = source.IsDocked;

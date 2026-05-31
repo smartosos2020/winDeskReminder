@@ -10,6 +10,8 @@ public sealed class TrayIconService : IDisposable
 {
     private readonly AppSettings _settings;
     private readonly SettingsStore _settingsStore;
+    private readonly DailyStatsStore _statsStore;
+    private readonly ToastNotificationService _toastNotificationService;
     private readonly ReminderController _controller;
     private readonly MainWindow _widget;
     private readonly Action _openSettings;
@@ -20,11 +22,14 @@ public sealed class TrayIconService : IDisposable
     private readonly ToolStripMenuItem _pauseMenuItem;
     private readonly ToolStripMenuItem _soundMenuItem;
     private readonly ToolStripMenuItem _focusMenuItem;
+    private readonly ToolStripMenuItem _statsMenuItem;
     private readonly ToolStripMenuItem _remindersMenuItem;
 
     public TrayIconService(
         AppSettings settings,
         SettingsStore settingsStore,
+        DailyStatsStore statsStore,
+        ToastNotificationService toastNotificationService,
         ReminderController controller,
         MainWindow widget,
         Action openSettings,
@@ -32,6 +37,8 @@ public sealed class TrayIconService : IDisposable
     {
         _settings = settings;
         _settingsStore = settingsStore;
+        _statsStore = statsStore;
+        _toastNotificationService = toastNotificationService;
         _controller = controller;
         _widget = widget;
         _openSettings = openSettings;
@@ -79,6 +86,7 @@ public sealed class TrayIconService : IDisposable
         };
 
         _focusMenuItem = new ToolStripMenuItem("专注模式");
+        _statsMenuItem = new ToolStripMenuItem("今日完成");
         _remindersMenuItem = new ToolStripMenuItem("提醒项目");
 
         var settingsMenuItem = new ToolStripMenuItem("设置");
@@ -102,6 +110,7 @@ public sealed class TrayIconService : IDisposable
             _pauseMenuItem,
             _soundMenuItem,
             _focusMenuItem,
+            _statsMenuItem,
             _remindersMenuItem,
             new ToolStripSeparator(),
             settingsMenuItem,
@@ -126,6 +135,7 @@ public sealed class TrayIconService : IDisposable
         _soundMenuItem.Checked = _settings.SoundEnabled;
         _pauseMenuItem.Text = _controller.UserPaused ? "恢复全部" : "暂停全部";
         BuildFocusMenu();
+        BuildStatsMenu();
         BuildRemindersMenu();
     }
 
@@ -136,10 +146,7 @@ public sealed class TrayIconService : IDisposable
             SystemSounds.Asterisk.Play();
         }
 
-        _notifyIcon.BalloonTipTitle = item.Name;
-        _notifyIcon.BalloonTipText = "提醒时间到了。打开小挂件确认后开始执行倒计时。";
-        _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-        _notifyIcon.ShowBalloonTip(5000);
+        _toastNotificationService.ShowReminder(item);
 
         if (_settings.WidgetEnabled)
         {
@@ -287,5 +294,30 @@ public sealed class TrayIconService : IDisposable
         var settingsItem = new ToolStripMenuItem("管理提醒项目");
         settingsItem.Click += (_, _) => _openSettings();
         _remindersMenuItem.DropDownItems.Add(settingsItem);
+    }
+
+    private void BuildStatsMenu()
+    {
+        _statsMenuItem.DropDownItems.Clear();
+        var total = _statsStore.GetTodayTotal();
+        _statsMenuItem.Text = total > 0 ? $"今日完成（{total}）" : "今日完成";
+
+        var stats = _statsStore.GetTodayStats();
+        if (stats.Count == 0)
+        {
+            _statsMenuItem.DropDownItems.Add(new ToolStripMenuItem("暂无完成记录")
+            {
+                Enabled = false
+            });
+            return;
+        }
+
+        foreach (var stat in stats)
+        {
+            _statsMenuItem.DropDownItems.Add(new ToolStripMenuItem($"{stat.ReminderName}：{stat.Count} 次")
+            {
+                Enabled = false
+            });
+        }
     }
 }

@@ -11,6 +11,9 @@ WinDeskReminder is a lightweight Windows desktop health reminder widget built wi
 - Multiple reminders with independent countdowns.
 - Custom reminder add/delete support in Settings.
 - Reminder confirmation flow: when a countdown reaches zero, confirm the reminder to start the action countdown, then automatically return to the work countdown.
+- Native Windows toast notifications with quick actions for start, snooze, and skip.
+- Daily completion stats in the tray menu.
+- Optional start with Windows.
 - Focus mode presets for 25, 50, and 90 minutes.
 - Timer pause while the session is locked, the system is suspended, focus mode is active, or the user has been idle for the configured duration.
 - Select target display and dock edge.
@@ -37,36 +40,34 @@ dotnet run
 dotnet build .\WinDeskReminder.csproj -c Release
 ```
 
-## Create Installer
+## Create Portable EXE
 
-The repository includes a PowerShell script that publishes a self-contained single-file executable and builds a single MSI package with WiX Toolset.
+The repository includes a PowerShell script that publishes a self-contained single-file executable.
 
 ```powershell
-.\scripts\Build-Installer.ps1
+.\scripts\Build-Portable.ps1
 ```
 
 Output:
 
 ```text
 artifacts\publish\win-x64-1.0.0-single\WinDeskReminder.exe
-artifacts\installer\WinDeskReminder-1.0.0-x64.msi
 ```
 
-To build another MSI version:
+To build another version:
 
 ```powershell
-.\scripts\Build-Installer.ps1 -Version 1.0.1
+.\scripts\Build-Portable.ps1 -Version 1.0.1
 ```
 
 ## Digital Signing
 
-The generated MSI is not signed by default. For public distribution, sign both the published EXE and the MSI with a trusted code-signing certificate and timestamp server.
+The generated EXE is not signed by default. For public distribution, sign it with a trusted code-signing certificate and timestamp server.
 
 Example:
 
 ```powershell
 signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /f .\codesign.pfx /p <password> .\artifacts\publish\win-x64-1.0.0-single\WinDeskReminder.exe
-signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /f .\codesign.pfx /p <password> .\artifacts\installer\WinDeskReminder-1.0.0-x64.msi
 ```
 
 ## Project Structure
@@ -75,12 +76,12 @@ signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /f .\codes
 Controls/                 Custom WPF controls
 Models/                   Reminder and dock models
 Services/                 Settings, tray icon, system activity, reminder controller
-installer/Product.wxs     WiX MSI definition
-scripts/Build-Installer.ps1
+scripts/Build-Portable.ps1
 App.xaml / MainWindow.xaml / SettingsWindow.xaml
 ```
 
 ## Notes
 
-- Build outputs, WiX local tools, installers, and debug symbols are intentionally excluded from Git.
+- Build outputs and debug symbols are intentionally excluded from Git.
 - Settings and error logs are written under `%APPDATA%\WinDeskReminder`.
+- Daily stats are written to `%APPDATA%\WinDeskReminder\stats.json`.

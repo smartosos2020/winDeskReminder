@@ -101,6 +101,7 @@ public partial class SettingsWindow : Window
         var remindersChanged = HaveRemindersChanged(_settings.Reminders, _draft.Reminders);
         _settings.CopyFrom(_draft);
         _settingsStore.Save(_settings);
+        StartupService.Apply(_settings.StartWithWindows);
         if (remindersChanged)
         {
             _controller.ApplySettings(_settings);

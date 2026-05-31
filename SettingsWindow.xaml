@@ -44,6 +44,11 @@
                                   Margin="0,10,0,0"
                                   FontSize="14"
                                   Foreground="#0F172A" />
+                        <CheckBox Content="开机自动启动"
+                                  IsChecked="{Binding StartWithWindows}"
+                                  Margin="0,10,0,0"
+                                  FontSize="14"
+                                  Foreground="#0F172A" />
 
                         <Grid Margin="0,16,0,0">
                             <Grid.ColumnDefinitions>

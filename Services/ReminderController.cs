@@ -40,6 +40,7 @@ public sealed class ReminderController : INotifyPropertyChanged, IDisposable
 
     public event PropertyChangedEventHandler? PropertyChanged;
     public event Action<ReminderItem>? NotificationRequested;
+    public event Action<ReminderItem>? ReminderCompleted;
 
     public ObservableCollection<ReminderItem> Items { get; }
 
@@ -155,6 +156,12 @@ public sealed class ReminderController : INotifyPropertyChanged, IDisposable
             return;
         }
 
+        if (item.Phase == ReminderPhase.Resting)
+        {
+            CompleteReminder(item);
+            return;
+        }
+
         Reset(item);
     }
 
@@ -212,8 +219,7 @@ public sealed class ReminderController : INotifyPropertyChanged, IDisposable
 
             if (item.Phase == ReminderPhase.Resting)
             {
-                item.Phase = ReminderPhase.Working;
-                item.Remaining = item.WorkDuration;
+                CompleteReminder(item);
             }
             else
             {
@@ -235,6 +241,13 @@ public sealed class ReminderController : INotifyPropertyChanged, IDisposable
         SystemStateText = UserPaused
             ? "已手动暂停"
             : _activityMonitor.GetPauseReason(TimeSpan.FromMinutes(_settings.IdlePauseMinutes));
+    }
+
+    private void CompleteReminder(ReminderItem item)
+    {
+        item.Phase = ReminderPhase.Working;
+        item.Remaining = item.WorkDuration;
+        ReminderCompleted?.Invoke(item);
     }
 
     private void NotifyFocusChanged()

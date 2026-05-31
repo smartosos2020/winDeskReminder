@@ -11,12 +11,9 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $repoRoot "WinDeskReminder.csproj"
 $publishDir = Join-Path $repoRoot "artifacts\publish\$Runtime-$Version-single"
-$installerDir = Join-Path $repoRoot "artifacts\installer"
-$toolsDir = Join-Path $repoRoot ".tools"
-$wix = Join-Path $toolsDir "wix.exe"
 
-if (-not (Test-Path $wix)) {
-    dotnet tool install --tool-path $toolsDir wix
+if (Test-Path $publishDir) {
+    Remove-Item -LiteralPath $publishDir -Recurse -Force
 }
 
 dotnet publish $project `
@@ -27,13 +24,8 @@ dotnet publish $project `
     -p:IncludeNativeLibrariesForSelfExtract=true `
     -p:EnableCompressionInSingleFile=true `
     -p:PublishReadyToRun=true `
+    -p:DebugType=None `
+    -p:DebugSymbols=false `
     -o $publishDir
 
-New-Item -ItemType Directory -Force $installerDir | Out-Null
-
-& $wix eula accept wix7 | Out-Null
-& $wix build (Join-Path $repoRoot "installer\Product.wxs") `
-    -arch x64 `
-    -d "ProductVersion=$Version" `
-    -d "PublishDir=$publishDir" `
-    -out (Join-Path $installerDir "WinDeskReminder-$Version-x64.msi")
+Write-Host "Portable EXE: $(Join-Path $publishDir 'WinDeskReminder.exe')"
