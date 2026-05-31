@@ -141,7 +141,7 @@ public sealed class TrayIconService : IDisposable
 
     public void ShowReminder(ReminderItem item)
     {
-        if (_settings.SoundEnabled)
+        if (_settings.SoundEnabled && item.SoundEnabled)
         {
             SystemSounds.Asterisk.Play();
         }

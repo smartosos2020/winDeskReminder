@@ -110,9 +110,11 @@ public sealed class ReminderController : INotifyPropertyChanged, IDisposable
 
             var item = matches.Dequeue();
             item.Name = definition.Name;
+            item.IconKind = definition.IconKind;
             item.WorkMinutes = definition.WorkMinutes;
             item.ActionMinutes = definition.ActionMinutes;
             item.IsEnabled = definition.IsEnabled;
+            item.SoundEnabled = definition.SoundEnabled;
             ClampRemainingToCurrentPhase(item);
             updatedItems.Add(item);
         }
@@ -199,7 +201,7 @@ public sealed class ReminderController : INotifyPropertyChanged, IDisposable
         _systemPaused = _activityMonitor.IsSystemPaused(TimeSpan.FromMinutes(_settings.IdlePauseMinutes));
         UpdateSystemStateText();
 
-        if (UserPaused || _systemPaused || IsFocusModeActive)
+        if (UserPaused || _systemPaused || IsFocusModeActive || IsQuietHoursActive())
         {
             return;
         }
@@ -238,9 +240,35 @@ public sealed class ReminderController : INotifyPropertyChanged, IDisposable
             return;
         }
 
+        if (IsQuietHoursActive())
+        {
+            SystemStateText = $"勿扰时段：{_settings.QuietHoursStart}-{_settings.QuietHoursEnd}";
+            return;
+        }
+
         SystemStateText = UserPaused
             ? "已手动暂停"
             : _activityMonitor.GetPauseReason(TimeSpan.FromMinutes(_settings.IdlePauseMinutes));
+    }
+
+    private bool IsQuietHoursActive()
+    {
+        if (!_settings.QuietHoursEnabled
+            || !TimeOnly.TryParse(_settings.QuietHoursStart, out var start)
+            || !TimeOnly.TryParse(_settings.QuietHoursEnd, out var end))
+        {
+            return false;
+        }
+
+        if (start == end)
+        {
+            return true;
+        }
+
+        var now = TimeOnly.FromDateTime(DateTime.Now);
+        return start < end
+            ? now >= start && now < end
+            : now >= start || now < end;
     }
 
     private void CompleteReminder(ReminderItem item)

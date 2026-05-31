@@ -9,11 +9,13 @@ WinDeskReminder is a lightweight Windows desktop health reminder widget built wi
 - Edge-docked floating widget with hover-to-expand behavior.
 - Tray icon with show/hide, pause/resume, sound toggle, focus mode, settings, and exit commands.
 - Multiple reminders with independent countdowns.
-- Custom reminder add/delete support in Settings.
+- Card-style reminder editor with custom add/delete support in Settings.
 - Reminder confirmation flow: when a countdown reaches zero, confirm the reminder to start the action countdown, then automatically return to the work countdown.
 - Native Windows toast notifications with quick actions for start, snooze, and skip.
 - Daily completion stats in the tray menu.
 - Optional start with Windows.
+- Per-reminder sound toggles and selectable reminder icons.
+- Configurable quiet hours that pause timers during do-not-disturb periods.
 - Focus mode presets for 25, 50, and 90 minutes.
 - Timer pause while the session is locked, the system is suspended, focus mode is active, or the user has been idle for the configured duration.
 - Select target display and dock edge.

@@ -9,9 +9,11 @@ namespace WinDeskReminder.Models;
 public sealed class ReminderItem : INotifyPropertyChanged
 {
     private string _name;
+    private string _iconKind;
     private int _workMinutes;
     private int _actionMinutes;
     private bool _isEnabled;
+    private bool _soundEnabled;
     private WpfColor _accentColor = WpfColor.FromRgb(34, 197, 94);
     private ReminderPhase _phase = ReminderPhase.Working;
     private TimeSpan _remaining;
@@ -20,9 +22,11 @@ public sealed class ReminderItem : INotifyPropertyChanged
     {
         Id = definition.Id;
         _name = definition.Name;
+        _iconKind = NormalizeIconKind(definition.IconKind, definition.Id, definition.Name);
         _workMinutes = Math.Max(1, definition.WorkMinutes);
         _actionMinutes = Math.Max(1, definition.ActionMinutes);
         _isEnabled = definition.IsEnabled;
+        _soundEnabled = definition.SoundEnabled;
         _remaining = WorkDuration;
     }
 
@@ -37,9 +41,18 @@ public sealed class ReminderItem : INotifyPropertyChanged
         {
             if (SetField(ref _name, value))
             {
-                OnPropertyChanged(nameof(IconKind));
+                if (string.IsNullOrWhiteSpace(_iconKind))
+                {
+                    OnPropertyChanged(nameof(IconKind));
+                }
             }
         }
+    }
+
+    public string IconKind
+    {
+        get => _iconKind;
+        set => SetField(ref _iconKind, NormalizeIconKind(value, Id, Name));
     }
 
     public int WorkMinutes
@@ -78,6 +91,12 @@ public sealed class ReminderItem : INotifyPropertyChanged
                 OnPropertyChanged(nameof(PhaseText));
             }
         }
+    }
+
+    public bool SoundEnabled
+    {
+        get => _soundEnabled;
+        set => SetField(ref _soundEnabled, value);
     }
 
     public WpfColor AccentColor
@@ -175,25 +194,6 @@ public sealed class ReminderItem : INotifyPropertyChanged
         _ => "\uE893"
     };
 
-    public string IconKind
-    {
-        get
-        {
-            var key = $"{Id} {Name}".ToLowerInvariant();
-            if (key.Contains("water") || key.Contains("喝水"))
-            {
-                return "water";
-            }
-
-            if (key.Contains("rest") || key.Contains("eye") || key.Contains("休息") || key.Contains("眼"))
-            {
-                return "eye";
-            }
-
-            return "stand";
-        }
-    }
-
     public double ProgressPercent
     {
         get
@@ -215,10 +215,33 @@ public sealed class ReminderItem : INotifyPropertyChanged
         {
             Id = Id,
             Name = Name,
+            IconKind = IconKind,
             WorkMinutes = WorkMinutes,
             ActionMinutes = ActionMinutes,
-            IsEnabled = IsEnabled
+            IsEnabled = IsEnabled,
+            SoundEnabled = SoundEnabled
         };
+    }
+
+    public static string NormalizeIconKind(string? value, string id, string name)
+    {
+        if (value is "stand" or "water" or "eye")
+        {
+            return value;
+        }
+
+        var key = $"{id} {name}".ToLowerInvariant();
+        if (key.Contains("water") || key.Contains("喝水"))
+        {
+            return "water";
+        }
+
+        if (key.Contains("rest") || key.Contains("eye") || key.Contains("休息") || key.Contains("眼"))
+        {
+            return "eye";
+        }
+
+        return "stand";
     }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

@@ -60,6 +60,8 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="吸附边缘" VerticalAlignment="Center" Foreground="#334155" />
@@ -99,6 +101,29 @@
                                            VerticalAlignment="Center"
                                            Margin="8,0,0,0" />
                             </DockPanel>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="勿扰时段" Margin="0,12,0,0" VerticalAlignment="Center" Foreground="#334155" />
+                            <CheckBox Grid.Row="4"
+                                      Grid.Column="1"
+                                      Content="启用"
+                                      IsChecked="{Binding QuietHoursEnabled}"
+                                      Margin="0,12,0,0"
+                                      Foreground="#334155" />
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="勿扰时间" Margin="0,12,0,0" VerticalAlignment="Center" Foreground="#334155" />
+                            <StackPanel Grid.Row="5"
+                                        Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Margin="0,12,0,0">
+                                <TextBox Width="70"
+                                         Text="{Binding QuietHoursStart, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text=" 至 "
+                                           Foreground="#334155"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0" />
+                                <TextBox Width="70"
+                                         Text="{Binding QuietHoursEnd, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -115,36 +140,101 @@
                                     Background="#E2E8F0"
                                     Foreground="#0F172A"
                                     Click="AddReminder_Click" />
-                            <Button Content="删除"
-                                    DockPanel.Dock="Right"
-                                    Background="#FEE2E2"
-                                    Foreground="#991B1B"
-                                    Click="DeleteReminder_Click" />
                         </DockPanel>
 
-                        <DataGrid x:Name="ReminderGrid"
-                                  ItemsSource="{Binding Reminders}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  HeadersVisibility="Column"
-                                  GridLinesVisibility="None"
-                                  RowHeaderWidth="0"
-                                  MinHeight="220">
-                            <DataGrid.Columns>
-                                <DataGridCheckBoxColumn Header="启用"
-                                                        Width="58"
-                                                        Binding="{Binding IsEnabled}" />
-                                <DataGridTextColumn Header="名称"
-                                                    Width="*"
-                                                    Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
-                                <DataGridTextColumn Header="间隔(分钟)"
-                                                    Width="95"
-                                                    Binding="{Binding WorkMinutes, UpdateSourceTrigger=PropertyChanged}" />
-                                <DataGridTextColumn Header="执行(分钟)"
-                                                    Width="95"
-                                                    Binding="{Binding ActionMinutes, UpdateSourceTrigger=PropertyChanged}" />
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <ItemsControl x:Name="ReminderList" ItemsSource="{Binding Reminders}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="8"
+                                            BorderBrush="#E2E8F0"
+                                            BorderThickness="1"
+                                            Padding="12"
+                                            Margin="0,0,0,10"
+                                            Background="#FCFDFF">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBox Grid.Row="0"
+                                                     Grid.Column="0"
+                                                     Height="30"
+                                                     FontSize="14"
+                                                     FontWeight="SemiBold"
+                                                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                                            <Button Grid.Row="0"
+                                                    Grid.Column="1"
+                                                    Content="删除"
+                                                    Background="#FEE2E2"
+                                                    Foreground="#991B1B"
+                                                    Tag="{Binding}"
+                                                    Margin="10,0,0,0"
+                                                    Click="DeleteReminder_Click" />
+
+                                            <StackPanel Grid.Row="1"
+                                                        Grid.ColumnSpan="2"
+                                                        Orientation="Horizontal"
+                                                        Margin="0,10,0,0">
+                                                <CheckBox Content="启用"
+                                                          IsChecked="{Binding IsEnabled}"
+                                                          Foreground="#334155"
+                                                          VerticalAlignment="Center" />
+                                                <CheckBox Content="声音"
+                                                          IsChecked="{Binding SoundEnabled}"
+                                                          Foreground="#334155"
+                                                          Margin="16,0,0,0"
+                                                          VerticalAlignment="Center" />
+                                                <TextBlock Text="图标"
+                                                           Foreground="#334155"
+                                                           Margin="18,0,8,0"
+                                                           VerticalAlignment="Center" />
+                                                <ComboBox Width="90"
+                                                          Height="30"
+                                                          SelectedValue="{Binding IconKind, UpdateSourceTrigger=PropertyChanged}"
+                                                          SelectedValuePath="Tag">
+                                                    <ComboBoxItem Content="站立" Tag="stand" />
+                                                    <ComboBoxItem Content="喝水" Tag="water" />
+                                                    <ComboBoxItem Content="护眼" Tag="eye" />
+                                                </ComboBox>
+                                            </StackPanel>
+
+                                            <Grid Grid.Row="2"
+                                                  Grid.ColumnSpan="2"
+                                                  Margin="0,10,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="90" />
+                                                    <ColumnDefinition Width="90" />
+                                                    <ColumnDefinition Width="90" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0"
+                                                           Text="间隔(分钟)"
+                                                           Foreground="#334155"
+                                                           VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1"
+                                                         Width="72"
+                                                         HorizontalAlignment="Left"
+                                                         Text="{Binding WorkMinutes, UpdateSourceTrigger=PropertyChanged}" />
+                                                <TextBlock Grid.Column="2"
+                                                           Text="执行(分钟)"
+                                                           Foreground="#334155"
+                                                           VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="3"
+                                                         Width="72"
+                                                         HorizontalAlignment="Left"
+                                                         Text="{Binding ActionMinutes, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </Border>
             </StackPanel>

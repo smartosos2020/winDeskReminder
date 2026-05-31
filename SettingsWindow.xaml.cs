@@ -55,25 +55,19 @@ public partial class SettingsWindow : Window
         _draft.Reminders.Add(new ReminderDefinition
         {
             Name = "新提醒",
+            IconKind = "stand",
             WorkMinutes = 30,
             ActionMinutes = 5,
-            IsEnabled = true
+            IsEnabled = true,
+            SoundEnabled = true
         });
 
-        ReminderGrid.Items.Refresh();
-        ReminderGrid.SelectedIndex = _draft.Reminders.Count - 1;
+        ReminderList.Items.Refresh();
     }
 
     private void DeleteReminder_Click(object sender, RoutedEventArgs e)
     {
-        ReminderGrid.CommitEdit(DataGridEditingUnit.Cell, true);
-        ReminderGrid.CommitEdit(DataGridEditingUnit.Row, true);
-
-        var selectedItems = ReminderGrid.SelectedItems
-            .OfType<ReminderDefinition>()
-            .ToList();
-
-        foreach (var selected in selectedItems)
+        if ((sender as FrameworkElement)?.Tag is ReminderDefinition selected)
         {
             _draft.Reminders.Remove(selected);
         }
@@ -83,20 +77,19 @@ public partial class SettingsWindow : Window
             _draft.Reminders.Add(new ReminderDefinition
             {
                 Name = "新提醒",
+                IconKind = "stand",
                 WorkMinutes = 30,
                 ActionMinutes = 5,
-                IsEnabled = true
+                IsEnabled = true,
+                SoundEnabled = true
             });
         }
 
-        ReminderGrid.Items.Refresh();
+        ReminderList.Items.Refresh();
     }
 
     private void Save_Click(object sender, RoutedEventArgs e)
     {
-        ReminderGrid.CommitEdit(DataGridEditingUnit.Cell, true);
-        ReminderGrid.CommitEdit(DataGridEditingUnit.Row, true);
-
         NormalizeDraft();
         var remindersChanged = HaveRemindersChanged(_settings.Reminders, _draft.Reminders);
         _settings.CopyFrom(_draft);
@@ -120,10 +113,13 @@ public partial class SettingsWindow : Window
     {
         _draft.BackdropOpacity = Math.Clamp(_draft.BackdropOpacity, 0.25, 1);
         _draft.IdlePauseMinutes = Math.Max(1, _draft.IdlePauseMinutes);
+        _draft.QuietHoursStart = AppSettings.NormalizeTimeText(_draft.QuietHoursStart, "22:00");
+        _draft.QuietHoursEnd = AppSettings.NormalizeTimeText(_draft.QuietHoursEnd, "08:00");
 
         foreach (var reminder in _draft.Reminders)
         {
             reminder.Name = string.IsNullOrWhiteSpace(reminder.Name) ? "提醒" : reminder.Name.Trim();
+            reminder.IconKind = ReminderItem.NormalizeIconKind(reminder.IconKind, reminder.Id, reminder.Name);
             reminder.WorkMinutes = Math.Max(1, reminder.WorkMinutes);
             reminder.ActionMinutes = Math.Max(1, reminder.ActionMinutes);
         }
@@ -144,9 +140,11 @@ public partial class SettingsWindow : Window
             var right = draft[i];
             if (left.Id != right.Id
                 || left.Name != right.Name
+                || left.IconKind != right.IconKind
                 || left.WorkMinutes != right.WorkMinutes
                 || left.ActionMinutes != right.ActionMinutes
-                || left.IsEnabled != right.IsEnabled)
+                || left.IsEnabled != right.IsEnabled
+                || left.SoundEnabled != right.SoundEnabled)
             {
                 return true;
             }

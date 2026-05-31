@@ -7,6 +7,9 @@ public sealed class AppSettings
     public bool WidgetEnabled { get; set; } = true;
     public bool SoundEnabled { get; set; } = true;
     public bool StartWithWindows { get; set; }
+    public bool QuietHoursEnabled { get; set; }
+    public string QuietHoursStart { get; set; } = "22:00";
+    public string QuietHoursEnd { get; set; } = "08:00";
     public DockEdge DockEdge { get; set; } = DockEdge.Right;
     public string? ScreenDeviceName { get; set; }
     public bool IsDocked { get; set; } = true;
@@ -22,6 +25,9 @@ public sealed class AppSettings
             WidgetEnabled = WidgetEnabled,
             SoundEnabled = SoundEnabled,
             StartWithWindows = StartWithWindows,
+            QuietHoursEnabled = QuietHoursEnabled,
+            QuietHoursStart = QuietHoursStart,
+            QuietHoursEnd = QuietHoursEnd,
             DockEdge = DockEdge,
             ScreenDeviceName = ScreenDeviceName,
             IsDocked = IsDocked,
@@ -37,6 +43,9 @@ public sealed class AppSettings
         WidgetEnabled = source.WidgetEnabled;
         SoundEnabled = source.SoundEnabled;
         StartWithWindows = source.StartWithWindows;
+        QuietHoursEnabled = source.QuietHoursEnabled;
+        QuietHoursStart = NormalizeTimeText(source.QuietHoursStart, "22:00");
+        QuietHoursEnd = NormalizeTimeText(source.QuietHoursEnd, "08:00");
         DockEdge = source.DockEdge;
         ScreenDeviceName = source.ScreenDeviceName;
         IsDocked = source.IsDocked;
@@ -54,26 +63,39 @@ public sealed class AppSettings
             {
                 Id = "stand",
                 Name = "站立活动",
+                IconKind = "stand",
                 WorkMinutes = 45,
                 ActionMinutes = 5,
-                IsEnabled = true
+                IsEnabled = true,
+                SoundEnabled = true
             },
             new ReminderDefinition
             {
                 Id = "water",
                 Name = "喝水",
+                IconKind = "water",
                 WorkMinutes = 30,
                 ActionMinutes = 1,
-                IsEnabled = true
+                IsEnabled = true,
+                SoundEnabled = true
             },
             new ReminderDefinition
             {
                 Id = "rest",
                 Name = "休息眼睛",
+                IconKind = "eye",
                 WorkMinutes = 60,
                 ActionMinutes = 5,
-                IsEnabled = true
+                IsEnabled = true,
+                SoundEnabled = true
             }
         ];
+    }
+
+    public static string NormalizeTimeText(string? value, string fallback)
+    {
+        return TimeOnly.TryParse(value, out var time)
+            ? time.ToString("HH:mm")
+            : fallback;
     }
 }

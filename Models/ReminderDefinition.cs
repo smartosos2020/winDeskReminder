@@ -4,9 +4,11 @@ public sealed class ReminderDefinition
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string Name { get; set; } = "提醒";
+    public string IconKind { get; set; } = "stand";
     public int WorkMinutes { get; set; } = 30;
     public int ActionMinutes { get; set; } = 5;
     public bool IsEnabled { get; set; } = true;
+    public bool SoundEnabled { get; set; } = true;
 
     public ReminderDefinition Clone()
     {
@@ -14,9 +16,11 @@ public sealed class ReminderDefinition
         {
             Id = Id,
             Name = Name,
+            IconKind = IconKind,
             WorkMinutes = WorkMinutes,
             ActionMinutes = ActionMinutes,
-            IsEnabled = IsEnabled
+            IsEnabled = IsEnabled,
+            SoundEnabled = SoundEnabled
         };
     }
 }

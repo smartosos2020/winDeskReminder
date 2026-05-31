@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using WinDeskReminder.Models;
 
 namespace WinDeskReminder.Services;
 
@@ -39,12 +40,18 @@ public sealed class SettingsStore
             settings.BackdropOpacity = Math.Clamp(settings.BackdropOpacity, 0.25, 1);
             settings.DockOffsetRatio = Math.Clamp(settings.DockOffsetRatio, 0, 1);
             settings.IdlePauseMinutes = Math.Max(1, settings.IdlePauseMinutes);
+            settings.QuietHoursStart = AppSettings.NormalizeTimeText(settings.QuietHoursStart, "22:00");
+            settings.QuietHoursEnd = AppSettings.NormalizeTimeText(settings.QuietHoursEnd, "08:00");
             foreach (var reminder in settings.Reminders)
             {
                 if (string.IsNullOrWhiteSpace(reminder.Id))
                 {
                     reminder.Id = Guid.NewGuid().ToString("N");
                 }
+
+                reminder.IconKind = ReminderItem.NormalizeIconKind(reminder.IconKind, reminder.Id, reminder.Name);
+                reminder.WorkMinutes = Math.Max(1, reminder.WorkMinutes);
+                reminder.ActionMinutes = Math.Max(1, reminder.ActionMinutes);
             }
             return settings;
         }
