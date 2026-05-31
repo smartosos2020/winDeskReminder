@@ -2,6 +2,8 @@
 
 WinDeskReminder is a lightweight Windows desktop health reminder widget built with WPF. It docks to a screen edge, hides into a compact handle, and reminds you to stand, drink water, rest your eyes, or follow your own custom reminder schedule.
 
+![WinDeskReminder UI](docs/images/windeskreminder-ui.png)
+
 ## Features
 
 - Edge-docked floating widget with hover-to-expand behavior.
