@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Diagnostics;
 using System.Media;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -12,6 +13,7 @@ public sealed class TrayIconService : IDisposable
     private readonly SettingsStore _settingsStore;
     private readonly DailyStatsStore _statsStore;
     private readonly ToastNotificationService _toastNotificationService;
+    private readonly UpdateService _updateService;
     private readonly ReminderController _controller;
     private readonly MainWindow _widget;
     private readonly Action _openSettings;
@@ -30,6 +32,7 @@ public sealed class TrayIconService : IDisposable
         SettingsStore settingsStore,
         DailyStatsStore statsStore,
         ToastNotificationService toastNotificationService,
+        UpdateService updateService,
         ReminderController controller,
         MainWindow widget,
         Action openSettings,
@@ -39,6 +42,7 @@ public sealed class TrayIconService : IDisposable
         _settingsStore = settingsStore;
         _statsStore = statsStore;
         _toastNotificationService = toastNotificationService;
+        _updateService = updateService;
         _controller = controller;
         _widget = widget;
         _openSettings = openSettings;
@@ -92,6 +96,12 @@ public sealed class TrayIconService : IDisposable
         var settingsMenuItem = new ToolStripMenuItem("设置");
         settingsMenuItem.Click += (_, _) => _openSettings();
 
+        var updateMenuItem = new ToolStripMenuItem("检查更新");
+        updateMenuItem.Click += async (_, _) => await CheckForUpdatesAsync(updateMenuItem);
+
+        var openLogsMenuItem = new ToolStripMenuItem("打开日志目录");
+        openLogsMenuItem.Click += (_, _) => LogService.OpenLogDirectory();
+
         var exitMenuItem = new ToolStripMenuItem("退出");
         exitMenuItem.Click += (_, _) => _exitApplication();
 
@@ -114,6 +124,8 @@ public sealed class TrayIconService : IDisposable
             _remindersMenuItem,
             new ToolStripSeparator(),
             settingsMenuItem,
+            updateMenuItem,
+            openLogsMenuItem,
             exitMenuItem
         ]);
         _controller.PropertyChanged += OnControllerPropertyChanged;
@@ -318,6 +330,39 @@ public sealed class TrayIconService : IDisposable
             {
                 Enabled = false
             });
+        }
+    }
+
+    private async Task CheckForUpdatesAsync(ToolStripMenuItem menuItem)
+    {
+        menuItem.Enabled = false;
+        var originalText = menuItem.Text;
+        menuItem.Text = "正在检查...";
+
+        try
+        {
+            var result = await _updateService.CheckForUpdatesAsync();
+            var buttons = result.IsUpdateAvailable && !string.IsNullOrWhiteSpace(result.ReleaseUrl)
+                ? MessageBoxButtons.YesNo
+                : MessageBoxButtons.OK;
+            var message = result.IsUpdateAvailable
+                ? $"{result.Message}\n\n是否打开下载页面？"
+                : result.Message;
+
+            var response = MessageBox.Show(message, "WinDeskReminder", buttons, MessageBoxIcon.Information);
+            if (response == DialogResult.Yes && result.ReleaseUrl is not null)
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = result.ReleaseUrl,
+                    UseShellExecute = true
+                });
+            }
+        }
+        finally
+        {
+            menuItem.Text = originalText;
+            menuItem.Enabled = true;
         }
     }
 }

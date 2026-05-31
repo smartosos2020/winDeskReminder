@@ -11,10 +11,7 @@ public sealed class SettingsStore
         WriteIndented = true
     };
 
-    public string SettingsPath { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "WinDeskReminder",
-        "settings.json");
+    public string SettingsPath { get; } = AppPaths.SettingsPath;
 
     public AppSettings Load()
     {

@@ -1,4 +1,3 @@
-using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using WinDeskReminder.Services;
@@ -39,11 +38,13 @@ public partial class App : System.Windows.Application
         _controller = new ReminderController(_settings);
         _widget = new MainWindow(_settings, _controller, _settingsStore, OpenSettings);
         var toastNotifications = new ToastNotificationService();
+        var updateService = new UpdateService();
         _tray = new TrayIconService(
             _settings,
             _settingsStore,
             _statsStore,
             toastNotifications,
+            updateService,
             _controller,
             _widget,
             OpenSettings,
@@ -168,7 +169,7 @@ public partial class App : System.Windows.Application
     {
         LogException(e.Exception);
         System.Windows.MessageBox.Show(
-            $"WinDeskReminder 启动或运行时出错：{e.Exception.Message}\n\n日志已写入：{GetLogPath()}",
+            $"WinDeskReminder 启动或运行时出错：{e.Exception.Message}\n\n日志已写入：{AppPaths.ErrorLogPath}",
             "WinDeskReminder",
             MessageBoxButton.OK,
             MessageBoxImage.Error);
@@ -186,23 +187,6 @@ public partial class App : System.Windows.Application
 
     private static void LogException(Exception exception)
     {
-        try
-        {
-            var path = GetLogPath();
-            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            File.AppendAllText(path, $"[{DateTimeOffset.Now:O}]{Environment.NewLine}{exception}{Environment.NewLine}{Environment.NewLine}");
-        }
-        catch
-        {
-            // Logging must not create a second startup failure.
-        }
-    }
-
-    private static string GetLogPath()
-    {
-        return Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "WinDeskReminder",
-            "error.log");
+        LogService.Write(exception);
     }
 }

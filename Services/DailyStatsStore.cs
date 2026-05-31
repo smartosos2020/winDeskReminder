@@ -18,10 +18,7 @@ public sealed class DailyStatsStore
         _stats = Load();
     }
 
-    public string StatsPath { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "WinDeskReminder",
-        "stats.json");
+    public string StatsPath { get; } = AppPaths.StatsPath;
 
     public void RecordCompletion(ReminderItem item)
     {

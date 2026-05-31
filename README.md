@@ -16,6 +16,7 @@ WinDeskReminder is a lightweight Windows desktop health reminder widget built wi
 - Optional start with Windows.
 - Per-reminder sound toggles and selectable reminder icons.
 - Configurable quiet hours that pause timers during do-not-disturb periods.
+- Tray menu shortcuts for checking GitHub Releases updates and opening the log directory.
 - Focus mode presets for 25, 50, and 90 minutes.
 - Timer pause while the session is locked, the system is suspended, focus mode is active, or the user has been idle for the configured duration.
 - Select target display and dock edge.
@@ -40,6 +41,12 @@ dotnet run
 
 ```powershell
 dotnet build .\WinDeskReminder.csproj -c Release
+```
+
+## Test
+
+```powershell
+dotnet run --project .\tests\WinDeskReminder.Tests\WinDeskReminder.Tests.csproj -c Release
 ```
 
 ## Create Portable EXE
@@ -87,3 +94,4 @@ App.xaml / MainWindow.xaml / SettingsWindow.xaml
 - Build outputs and debug symbols are intentionally excluded from Git.
 - Settings and error logs are written under `%APPDATA%\WinDeskReminder`.
 - Daily stats are written to `%APPDATA%\WinDeskReminder\stats.json`.
+- Update checks read the latest GitHub Release from `smartosos2020/winDeskReminder`.
